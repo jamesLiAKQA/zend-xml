@@ -70,9 +70,6 @@ class Zend_Xml_Security
      */
     public static function scan($xml, DOMDocument $dom = null)
     {
-        // If running with PHP-FPM we perform an heuristic scan
-        // We cannot use libxml_disable_entity_loader because of this bug
-        // @see https://bugs.php.net/bug.php?id=64938
         if (self::isPhpFpm()) {
             self::heuristicScan($xml);
         }
@@ -83,7 +80,6 @@ class Zend_Xml_Security
         }
 
         if (!self::isPhpFpm()) {
-            $loadEntities = libxml_disable_entity_loader(true);
             $useInternalXmlErrors = libxml_use_internal_errors(true);
         }
 
@@ -97,7 +93,6 @@ class Zend_Xml_Security
         if (!$result) {
             // Entity load to previous setting
             if (!self::isPhpFpm()) {
-                libxml_disable_entity_loader($loadEntities);
                 libxml_use_internal_errors($useInternalXmlErrors);
             }
             return false;
@@ -117,7 +112,6 @@ class Zend_Xml_Security
 
         // Entity load to previous setting
         if (!self::isPhpFpm()) {
-            libxml_disable_entity_loader($loadEntities);
             libxml_use_internal_errors($useInternalXmlErrors);
         }
 
@@ -169,7 +163,7 @@ class Zend_Xml_Security
         $isVulnerableVersion = (
             version_compare(PHP_VERSION, '5.5.22', 'lt')
             || (
-                version_compare(PHP_VERSION, '5.6', 'gte')
+                version_compare(PHP_VERSION, '5.6', '>=')
                 && version_compare(PHP_VERSION, '5.6.6', 'lt')
             )
         );
